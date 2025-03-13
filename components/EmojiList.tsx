@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, FlatList, Platform, Pressable } from 'react-native';
 import { Image, type ImageSource } from 'expo-image';
+import { Asset } from "expo-asset"
 
 type Props = {
   onSelect: (image: ImageSource) => void;
@@ -8,14 +9,26 @@ type Props = {
 }
 
 export default function EmojiList({ onSelect, onCloseModal }: Props) {
-  const [emoji] = useState<ImageSource[]>([
-    require('../assets/images/emoji1.png'),
-    require('../assets/images/emoji2.png'),
-    require('../assets/images/emoji3.png'),
-    require('../assets/images/emoji4.png'),
-    require('../assets/images/emoji5.png'),
-    require('../assets/images/emoji6.png'),
-  ]);
+  const emojiImages = [
+    require("../assets/images/emoji1.png"),
+    require("../assets/images/emoji2.png"),
+    require("../assets/images/emoji3.png"),
+    require("../assets/images/emoji4.png"),
+    require("../assets/images/emoji5.png"),
+    require("../assets/images/emoji6.png"),
+  ];
+
+  const [emoji, setEmoji] = useState<string[]>([]);
+
+  useEffect(() => {
+    // 预加载图片资源
+    const loadAssets = async () => {
+      const assetUris = emojiImages.map((img) => Asset.fromModule(img).uri);
+      setEmoji(assetUris);
+    };
+
+    loadAssets();
+  }, [])
 
   return (
     <FlatList
@@ -25,11 +38,12 @@ export default function EmojiList({ onSelect, onCloseModal }: Props) {
       contentContainerStyle={styles.listContainer}
       renderItem={({ item, index }) => (
         <Pressable
+          key={index}
           onPress={() => {
-            onSelect(item);
+            onSelect( {uri: item});
             onCloseModal();
           }}>
-          <Image source={item} key={index} style={styles.image} />
+          <Image source={{ uri: item }}  style={styles.image} />
         </Pressable>
       )}
     />
